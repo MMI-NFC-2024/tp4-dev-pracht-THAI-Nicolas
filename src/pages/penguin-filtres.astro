@@ -24,7 +24,7 @@ import Layout from "../layouts/Layout.astro";
     <option value="MALE">Mâle</option>
     <option value="FEMALE">Femelle</option>
   </select>
-  
+
   <div id="myplot"></div>
   
 
@@ -36,24 +36,43 @@ import Layout from "../layouts/Layout.astro";
   const selectIsland = document.querySelector("#island") as HTMLSelectElement;
   const selectSex = document.querySelector("#sex") as HTMLSelectElement;
 
+  interface Filters {
+    species: string;
+    island: string;
+    sex: string;
+  }
+
+  function getFilters(): Filters {
+    return {
+      species: selectSpecies?.value || "",
+      island: selectIsland?.value || "",
+      sex: selectSex?.value || ""
+    };
+  }
+
+  function filterPenguins(penguins: any[], filters: Filters): any[] {
+    return penguins.filter((penguin: any) => {
+      const matchSpecies = !filters.species || penguin.species === filters.species;
+      const matchIsland = !filters.island || penguin.island === filters.island;
+      const matchSex = !filters.sex || penguin.sex === filters.sex;
+      
+      return matchSpecies && matchIsland && matchSex;
+    });
+  }
+
   function renderPlot() {
-    const species = selectSpecies?.value;
-    const island = selectIsland?.value;
-    const sex = selectSex?.value;
-    
+    const filters = getFilters();
     const div = document.querySelector("#myplot");
     
     if (div) {
       div.innerHTML = "";
     }
     
+    const filteredData = filterPenguins(penguins, filters);
+    
     const plot = Plot.plot({
       marks: [
-        Plot.dot(penguins.filter(d => 
-          (!species || d.species === species) &&
-          (!island || d.island === island) &&
-          (!sex || d.sex === sex)
-        ), {
+        Plot.dot(filteredData, {
           x: "culmen_length_mm",
           y: "culmen_depth_mm",
           stroke: "species",

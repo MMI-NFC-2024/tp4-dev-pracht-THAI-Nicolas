@@ -1,0 +1,81 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout>
+  <h1 class="text-2xl">Weather Data Visualization</h1>
+
+  <select name="location" id="location">
+    <option value="">Tous les lieux</option>
+    <option value="New York">New York</option>
+    <option value="Seattle">Seattle</option>
+  </select>
+
+  <select name="weather" id="weather">
+    <option value="">Tous les temps</option>
+    <option value="sun">Sun</option>
+    <option value="rain">Rain</option>
+    <option value="snow">Snow</option>
+    <option value="drizzle">Drizzle</option>
+    <option value="fog">Fog</option>
+  </select>
+  
+  <div id="myplot"></div>
+
+<script>
+  import * as Plot from "@observablehq/plot";
+  import weather from "../assets/weather.json";
+
+  const selectLocation = document.querySelector("#location") as HTMLSelectElement;
+  const selectWeather = document.querySelector("#weather") as HTMLSelectElement;
+
+  interface Filters {
+    location: string;
+    weather: string;
+  }
+
+  function getFilters(): Filters {
+    return {
+      location: selectLocation?.value || "",
+      weather: selectWeather?.value || ""
+    };
+  }
+
+  function filterWeather(weather: any[], filters: Filters): any[] {
+    return weather.filter((data: any) => {
+      const matchLocation = !filters.location || data.location === filters.location;
+      const matchWeather = !filters.weather || data.weather === filters.weather;
+      
+      return matchLocation && matchWeather;
+    });
+  }
+
+  function renderPlot() {
+    const filters = getFilters();
+    const div = document.querySelector("#myplot");
+    
+    if (div) {
+      div.innerHTML = "";
+    }
+    
+    const filteredData = filterWeather(weather, filters);
+    
+    const plot = Plot.plot({
+      marks: [
+        Plot.dot(filteredData, {
+          x: "temp_max",
+          y: "temp_min", 
+          stroke: "weather",
+        }),
+      ],
+    });
+    
+    div?.append(plot);
+  }
+
+  selectLocation?.addEventListener("change", renderPlot);
+  selectWeather?.addEventListener("change", renderPlot);
+
+  renderPlot();
+</script>
+</Layout>
