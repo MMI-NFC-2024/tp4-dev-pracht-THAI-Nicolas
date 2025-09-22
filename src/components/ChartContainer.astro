@@ -1,0 +1,67 @@
+---
+export interface Props {
+  title: string;
+  subtitle?: string;
+  description?: string;
+}
+
+const { title, subtitle, description } = Astro.props;
+---
+
+<div class="chart-container">
+  <div class="chart-header">
+    <h2 class="chart-title">{title}</h2>
+    {subtitle && <p class="chart-subtitle">{subtitle}</p>}
+    {description && <p class="chart-description">{description}</p>}
+  </div>
+  
+  <div class="filters-section">
+    <div class="filters-grid">
+      <slot name="filters" />
+    </div>
+  </div>
+  
+  <div class="chart-wrapper">
+    <div class="chart-content">
+      <slot name="chart" />
+    </div>
+  </div>
+</div>
+
+<style>
+  .chart-container {
+    @apply bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden;
+  }
+  
+  .chart-header {
+    @apply px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-750;
+  }
+  
+  .chart-title {
+    @apply text-2xl font-bold text-gray-900 dark:text-white mb-2;
+  }
+  
+  .chart-subtitle {
+    @apply text-lg text-gray-600 dark:text-gray-300 mb-1;
+  }
+  
+  .chart-description {
+    @apply text-sm text-gray-500 dark:text-gray-400;
+  }
+  
+  .filters-section {
+    @apply px-6 py-4 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700;
+  }
+  
+  .filters-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+  }
+  
+  .chart-wrapper {
+    @apply p-6;
+  }
+  
+  .chart-content {
+    @apply bg-white dark:bg-gray-900 rounded-lg border border-gray-100 dark:border-gray-800 p-4 min-h-[500px] flex items-center justify-center;
+  }
+</style>

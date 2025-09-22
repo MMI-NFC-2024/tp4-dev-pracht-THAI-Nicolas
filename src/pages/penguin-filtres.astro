@@ -3,30 +3,73 @@ import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout>
-  <h1 class="text-2xl">Simple Penguin</h1>
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      
+      <div class="text-center mb-8">
+        <h1 class="page-title">Analyse des Pingouins</h1>
+        <p class="text-xl text-gray-600 mb-2">
+          Explorez les caractéristiques physiques des pingouins selon leur espèce, île et sexe
+        </p>
+        <p class="text-sm text-gray-500">
+          Graphique : Longueur du bec (mm) vs Profondeur du bec (mm)
+        </p>
+      </div>
 
-  <select name="species" id="species">
-    <option value="">Toutes les espèces</option>
-    <option value="Adelie">Adelie</option>
-    <option value="Chinstrap">Chinstrap</option>
-    <option value="Gentoo">Gentoo</option>
-  </select>
+      <div class="card mb-8">
+        
+        <div class="card-header">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">🔍 Filtres</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+            <div class="filter-group">
+              <label for="species" class="filter-label">Espèce</label>
+              <select name="species" id="species" class="filter-select">
+                <option value="">Toutes les espèces</option>
+                <option value="Adelie">Adelie</option>
+                <option value="Chinstrap">Chinstrap</option>
+                <option value="Gentoo">Gentoo</option>
+              </select>
+            </div>
 
-  <select name="island" id="island">
-    <option value="">Toutes les îles</option>
-    <option value="Biscoe">Biscoe</option> 
-    <option value="Dream">Dream</option>
-    <option value="Torgersen">Torgersen</option>
-  </select>
+            <div class="filter-group">
+              <label for="island" class="filter-label">Île</label>
+              <select name="island" id="island" class="filter-select">
+                <option value="">Toutes les îles</option>
+                <option value="Biscoe">Biscoe</option> 
+                <option value="Dream">Dream</option>
+                <option value="Torgersen">Torgersen</option>
+              </select>
+            </div>
 
-  <select name="sex" id="sex">
-    <option value="">Tous les genres</option>
-    <option value="MALE">Mâle</option>
-    <option value="FEMALE">Femelle</option>
-  </select>
+            <div class="filter-group">
+              <label for="sex" class="filter-label">Sexe</label>
+              <select name="sex" id="sex" class="filter-select">
+                <option value="">Tous les sexes</option>
+                <option value="MALE">Mâle</option>
+                <option value="FEMALE">Femelle</option>
+              </select>
+            </div>
+          </div>
+        </div>
 
-  <div id="myplot"></div>
-  
+        <div class="card-content">
+          <div id="chart-info" class="text-center mb-4">
+            <span class="text-sm text-gray-500 loading">Chargement des données...</span>
+          </div>
+          <div id="myplot" class="chart-container">
+            <div class="chart-loading">
+              <div class="loading-spinner"></div>
+              <p>Génération du graphique...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      
+      </div>
+    </div>
+  </div>
 
 <script>
   import * as Plot from "@observablehq/plot";
@@ -35,6 +78,7 @@ import Layout from "../layouts/Layout.astro";
   const selectSpecies = document.querySelector("#species") as HTMLSelectElement;
   const selectIsland = document.querySelector("#island") as HTMLSelectElement;
   const selectSex = document.querySelector("#sex") as HTMLSelectElement;
+  const chartInfo = document.querySelector("#chart-info") as HTMLElement;
 
   interface Filters {
     species: string;
@@ -60,6 +104,20 @@ import Layout from "../layouts/Layout.astro";
     });
   }
 
+  function updateChartInfo(filteredData: any[]) {
+    const total = penguins.length;
+    const filtered = filteredData.length;
+    const percentage = Math.round((filtered / total) * 100);
+    
+    if (chartInfo) {
+      chartInfo.innerHTML = `
+        <span class="text-sm font-medium text-blue-600">
+          ${filtered} pingouins affichés sur ${total} (${percentage}%)
+        </span>
+      `;
+    }
+  }
+
   function renderPlot() {
     const filters = getFilters();
     const div = document.querySelector("#myplot");
@@ -69,15 +127,46 @@ import Layout from "../layouts/Layout.astro";
     }
     
     const filteredData = filterPenguins(penguins, filters);
+    updateChartInfo(filteredData);
+    
+    if (filteredData.length === 0) {
+      if (div) {
+        div.innerHTML = `
+          <div class="chart-placeholder">
+            <div class="text-center">
+              <div class="text-4xl mb-4">🔍</div>
+              <p class="text-gray-500">Aucun pingouin ne correspond aux filtres sélectionnés</p>
+              <p class="text-sm text-gray-400 mt-2">Essayez de modifier vos critères de recherche</p>
+            </div>
+          </div>
+        `;
+      }
+      return;
+    }
     
     const plot = Plot.plot({
+      title: "Relation entre longueur et profondeur du bec",
+      subtitle: `${filteredData.length} pingouins`,
+      width: 800,
+      height: 500,
+      marginLeft: 60,
+      marginBottom: 50,
+      grid: true,
+      color: {
+        legend: true,
+        domain: ["Adelie", "Chinstrap", "Gentoo"],
+        range: ["#ff6b6b", "#4ecdc4", "#45b7d1"]
+      },
       marks: [
         Plot.dot(filteredData, {
           x: "culmen_length_mm",
           y: "culmen_depth_mm",
-          stroke: "species",
-        }),
-      ],
+          fill: "species",
+          r: 5,
+          opacity: 0.8,
+          tip: true
+        })
+      ]
     });
     
     div?.append(plot);
@@ -87,6 +176,51 @@ import Layout from "../layouts/Layout.astro";
   selectIsland?.addEventListener("change", renderPlot);
   selectSex?.addEventListener("change", renderPlot);
   
+  // Initial render
   renderPlot();
 </script>
+
+<style>
+  .filter-group {
+    @apply flex flex-col space-y-2;
+  }
+  
+  .filter-label {
+    @apply text-sm font-medium text-gray-700;
+  }
+  
+  .filter-select {
+    @apply block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm 
+           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+           bg-white transition-all duration-200 hover:border-gray-400;
+  }
+  
+  .filter-select:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  }
+
+  .chart-container {
+    min-height: 500px;
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .chart-placeholder {
+    @apply flex items-center justify-center h-96 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300;
+  }
+
+  .chart-loading {
+    @apply text-gray-500 text-center;
+  }
+
+  .loading-spinner {
+    @apply animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4;
+  }
+</style>
 </Layout>

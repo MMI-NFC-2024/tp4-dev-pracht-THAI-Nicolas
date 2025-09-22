@@ -3,24 +3,63 @@ import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout>
-  <h1 class="text-2xl">Weather Data Visualization</h1>
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      
+      <div class="text-center mb-8">
+        <h1 class="page-title">Analyse Météorologique</h1>
+        <p class="text-xl text-gray-600 mb-2">
+          Explorez les corrélations entre températures maximales et minimales
+        </p>
+        <p class="text-sm text-gray-500">
+          Graphique : Température Max (°F) vs Température Min (°F)
+        </p>
+      </div>
 
-  <select name="location" id="location">
-    <option value="">Tous les lieux</option>
-    <option value="New York">New York</option>
-    <option value="Seattle">Seattle</option>
-  </select>
+      <div class="card mb-8">
+        
+        <div class="card-header">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">🔍 Filtres</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <div class="filter-group">
+              <label for="location" class="filter-label">Localisation</label>
+              <select name="location" id="location" class="filter-select">
+                <option value="">Toutes les villes</option>
+                <option value="New York">New York</option>
+                <option value="Seattle">Seattle</option>
+              </select>
+            </div>
 
-  <select name="weather" id="weather">
-    <option value="">Tous les temps</option>
-    <option value="sun">Sun</option>
-    <option value="rain">Rain</option>
-    <option value="snow">Snow</option>
-    <option value="drizzle">Drizzle</option>
-    <option value="fog">Fog</option>
-  </select>
-  
-  <div id="myplot"></div>
+            <div class="filter-group">
+              <label for="weather" class="filter-label">Type de temps</label>
+              <select name="weather" id="weather" class="filter-select">
+                <option value="">Tous les temps</option>
+                <option value="sun">Ensoleillé</option>
+                <option value="rain">Pluvieux</option>
+                <option value="snow">Neigeux</option>
+                <option value="drizzle">Bruine</option>
+                <option value="fog">Brouillard</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-content">
+          <div id="chart-info" class="text-center mb-4">
+            <span class="text-sm text-gray-500 loading">Chargement des données...</span>
+          </div>
+          <div id="myplot" class="chart-container">
+            <div class="chart-loading">
+              <div class="loading-spinner"></div>
+              <p>Génération du graphique...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
 
 <script>
   import * as Plot from "@observablehq/plot";
@@ -28,6 +67,7 @@ import Layout from "../layouts/Layout.astro";
 
   const selectLocation = document.querySelector("#location") as HTMLSelectElement;
   const selectWeather = document.querySelector("#weather") as HTMLSelectElement;
+  const chartInfo = document.querySelector("#chart-info") as HTMLElement;
 
   interface Filters {
     location: string;
@@ -50,6 +90,20 @@ import Layout from "../layouts/Layout.astro";
     });
   }
 
+  function updateChartInfo(filteredData: any[]) {
+    const total = weather.length;
+    const filtered = filteredData.length;
+    const percentage = Math.round((filtered / total) * 100);
+    
+    if (chartInfo) {
+      chartInfo.innerHTML = `
+        <span class="text-sm font-medium text-blue-600">
+          ${filtered} observations sur ${total} (${percentage}%)
+        </span>
+      `;
+    }
+  }
+
   function renderPlot() {
     const filters = getFilters();
     const div = document.querySelector("#myplot");
@@ -59,15 +113,53 @@ import Layout from "../layouts/Layout.astro";
     }
     
     const filteredData = filterWeather(weather, filters);
+    updateChartInfo(filteredData);
+    
+    if (filteredData.length === 0) {
+      if (div) {
+        div.innerHTML = `
+          <div class="chart-placeholder">
+            <div class="text-center">
+              <div class="text-4xl mb-4">🌤️</div>
+              <p class="text-gray-500">Aucune donnée météo ne correspond aux filtres</p>
+              <p class="text-sm text-gray-400 mt-2">Essayez de modifier vos critères</p>
+            </div>
+          </div>
+        `;
+      }
+      return;
+    }
     
     const plot = Plot.plot({
+      title: "Corrélation entre températures maximales et minimales",
+      subtitle: `${filteredData.length} observations météorologiques`,
+      width: 800,
+      height: 500,
+      marginLeft: 60,
+      marginBottom: 50,
+      grid: true,
+      color: {
+        legend: true,
+        domain: ["drizzle", "fog", "rain", "snow", "sun"],
+        range: ["#64748b", "#94a3b8", "#3b82f6", "#0ea5e9", "#f59e0b"]
+      },
       marks: [
         Plot.dot(filteredData, {
           x: "temp_max",
-          y: "temp_min", 
-          stroke: "weather",
+          y: "temp_min",
+          fill: "weather",
+          r: 5,
+          opacity: 0.8,
+          tip: true
         }),
-      ],
+        Plot.linearRegressionY(filteredData, {
+          x: "temp_max",
+          y: "temp_min",
+          stroke: "red",
+          strokeWidth: 2,
+          strokeOpacity: 0.7
+        })
+      ]
     });
     
     div?.append(plot);
@@ -78,4 +170,48 @@ import Layout from "../layouts/Layout.astro";
 
   renderPlot();
 </script>
+
+<style>
+  .filter-group {
+    @apply flex flex-col space-y-2;
+  }
+  
+  .filter-label {
+    @apply text-sm font-medium text-gray-700;
+  }
+  
+  .filter-select {
+    @apply block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm 
+           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+           bg-white transition-all duration-200 hover:border-gray-400;
+  }
+  
+  .filter-select:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  }
+
+  .chart-container {
+    min-height: 500px;
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .chart-placeholder {
+    @apply flex items-center justify-center h-96 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg border-2 border-dashed border-gray-300;
+  }
+
+  .chart-loading {
+    @apply text-gray-500 text-center;
+  }
+
+  .loading-spinner {
+    @apply animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4;
+  }
+</style>
 </Layout>

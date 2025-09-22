@@ -2,6 +2,140 @@
 import Layout from "../layouts/Layout.astro"
 ---
 <Layout>
-  <h1 class="text-2xl">Sommaire</h1>
-  <p>Welcome to the Astro project!</p>
-</Layout>
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      
+      <div class="text-center mb-16">
+        <h1 class="page-title text-5xl md:text-6xl font-bold mb-6">
+          TP-4 R312
+        </h1>
+        <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+          Explorez et visualisez des données interactives avec Observable Plot. 
+          Découvrez les relations cachées dans les données de pingouins, météo et diamants.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8 mb-16">
+        
+        <div class="card group hover:scale-105 transition-transform duration-300">
+          <div class="card-header">
+            <div class="text-2xl mb-4 font-bold text-gray-700">Penguins Datasets</div>
+            <h3 class="text-xl font-bold text-gray-900">Pingouins</h3>
+          </div>
+          <div class="card-content">
+            <p class="text-gray-600 mb-4">
+              Analysez les caractéristiques physiques des pingouins selon leur espèce, île et sexe.
+            </p>
+            <ul class="text-sm text-gray-500 space-y-1 mb-6">
+              <li>• 3 espèces (Adelie, Chinstrap, Gentoo)</li>
+              <li>• Longueur vs profondeur du bec</li>
+              <li>• Filtres interactifs</li>
+            </ul>
+            <a href="/penguin-filtres" class="btn btn-primary w-full">
+              Voir les données
+            </a>
+          </div>
+        </div>
+
+        <div class="card group hover:scale-105 transition-transform duration-300">
+          <div class="card-header">
+            <div class="text-2xl mb-4 font-bold text-gray-700">Weather Datasets</div>
+            <h3 class="text-xl font-bold text-gray-900">Météo</h3>
+          </div>
+          <div class="card-content">
+            <p class="text-gray-600 mb-4">
+              Explorez les corrélations entre températures maximales et minimales selon la météo.
+            </p>
+            <ul class="text-sm text-gray-500 space-y-1 mb-6">
+              <li>• New York et Seattle</li>
+              <li>• 5 types de temps</li>
+              <li>• Corrélations température</li>
+            </ul>
+            <a href="/weather-filtres" class="btn btn-primary w-full">
+              Analyser la météo
+            </a>
+          </div>
+        </div>
+
+        <div class="card group hover:scale-105 transition-transform duration-300">
+          <div class="card-header">
+            <div class="text-2xl mb-4 font-bold text-gray-700">Diamonds Datasets</div>
+            <h3 class="text-xl font-bold text-gray-900">Diamants</h3>
+          </div>
+          <div class="card-content">
+            <p class="text-gray-600 mb-4">
+              Découvrez la relation entre prix et poids des diamants selon leur qualité.
+            </p>
+            <ul class="text-sm text-gray-500 space-y-1 mb-6">
+              <li>• Prix vs carats</li>
+              <li>• Qualité de taille, couleur, pureté</li>
+              <li>• Régression linéaire</li>
+            </ul>
+            <a href="/diamonds-filtres" class="btn btn-primary w-full">
+              Explorer les diamants
+            </a>
+          </div>
+        </div>
+      </div>
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    border: 1px solid transparent;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    text-decoration: none;
+  }
+  
+  .btn-primary {
+    background-color: #374151;
+    color: white;
+  }
+  
+  .btn-primary:hover {
+    background-color: #1f2937;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+  }
+  
+  .btn-secondary {
+    background-color: transparent;
+    color: #374151;
+    border-color: #374151;
+  }
+  
+  .btn-secondary:hover {
+    background-color: #374151;
+    color: white;
+    transform: translateY(-1px);
+  }
+
+  .card {
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  
+  .card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  .card-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+  }
+
+  .card-content {
+    padding: 1.5rem;
+  }
+</style>

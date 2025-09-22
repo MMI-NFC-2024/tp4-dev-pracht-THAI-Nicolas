@@ -1,0 +1,45 @@
+---
+export interface Props {
+  id: string;
+  name: string;
+  label: string;
+  options: Array<{ value: string; label: string }>;
+  placeholder?: string;
+}
+
+const { id, name, label, options, placeholder = "Tous" } = Astro.props;
+---
+
+<div class="filter-container">
+  <label for={id} class="filter-label">
+    {label}
+  </label>
+  <select id={id} name={name} class="filter-select">
+    <option value="">{placeholder}</option>
+    {options.map(option => (
+      <option value={option.value}>{option.label}</option>
+    ))}
+  </select>
+</div>
+
+<style>
+  .filter-container {
+    @apply flex flex-col space-y-2;
+  }
+  
+  .filter-label {
+    @apply text-sm font-medium text-gray-700 dark:text-gray-300;
+  }
+  
+  .filter-select {
+    @apply block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm 
+           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+           bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white
+           transition-all duration-200 hover:border-gray-400;
+  }
+  
+  .filter-select:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  }
+</style>
