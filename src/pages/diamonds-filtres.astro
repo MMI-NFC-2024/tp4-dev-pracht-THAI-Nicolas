@@ -1,0 +1,112 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout>
+  <h1 class="text-2xl">Relation entre le prix et le carat des diamants</h1>
+
+  <select name="cut" id="cut">
+    <option value="">Toutes les tailles</option>
+    <option value="Fair">Fair</option>
+    <option value="Good">Good</option>
+    <option value="Very Good">Very Good</option>
+    <option value="Premium">Premium</option>
+    <option value="Ideal">Ideal</option>
+  </select>
+
+  <select name="color" id="color">
+    <option value="">Toutes les couleurs</option>
+    <option value="D">D</option>
+    <option value="E">E</option>
+    <option value="F">F</option>
+    <option value="G">G</option>
+    <option value="H">H</option>
+    <option value="I">I</option>
+    <option value="J">J</option>
+  </select>
+
+  <select name="clarity" id="clarity">
+    <option value="">Toutes les puretés</option>
+    <option value="I1">I1</option>
+    <option value="SI2">SI2</option>
+    <option value="SI1">SI1</option>
+    <option value="VS2">VS2</option>
+    <option value="VS1">VS1</option>
+    <option value="VVS2">VVS2</option>
+    <option value="VVS1">VVS1</option>
+    <option value="IF">IF</option>
+  </select>
+  
+  <div id="myplot"></div>
+
+<script>
+  import * as Plot from "@observablehq/plot";
+  import diamonds from "../assets/diamonds.json";
+
+  const selectCut = document.querySelector("#cut") as HTMLSelectElement;
+  const selectColor = document.querySelector("#color") as HTMLSelectElement;
+  const selectClarity = document.querySelector("#clarity") as HTMLSelectElement;
+
+  interface Filters {
+    cut: string;
+    color: string;
+    clarity: string;
+  }
+
+  function getFilters(): Filters {
+    return {
+      cut: selectCut?.value || "",
+      color: selectColor?.value || "",
+      clarity: selectClarity?.value || ""
+    };
+  }
+
+  function filterDiamonds(diamonds: any[], filters: Filters): any[] {
+    return diamonds.filter((data: any) => {
+      const matchCut = !filters.cut || data.cut === filters.cut;
+      const matchColor = !filters.color || data.color === filters.color;
+      const matchClarity = !filters.clarity || data.clarity === filters.clarity;
+      
+      return matchCut && matchColor && matchClarity;
+    });
+  }
+
+  function renderPlot() {
+    const filters = getFilters();
+    const div = document.querySelector("#myplot");
+    
+    if (div) {
+      div.innerHTML = "";
+    }
+    
+    const filteredData = filterDiamonds(diamonds, filters);
+    
+    const plot = Plot.plot({
+      marks: [
+        Plot.dot(filteredData, {
+          x: "carat",
+          y: "price",
+          fill: "cut",
+          r: 3,
+          opacity: 0.6,
+          tip: true
+        }),
+        Plot.linearRegressionY(filteredData, {
+          x: "carat",
+          y: "price",
+          stroke: "red",
+          strokeWidth: 2
+        })
+      ]
+    });
+    
+    div?.append(plot);
+  }
+
+  selectCut?.addEventListener("change", renderPlot);
+  selectColor?.addEventListener("change", renderPlot);
+  selectClarity?.addEventListener("change", renderPlot);
+
+  renderPlot();
+</script>
+</Layout>
